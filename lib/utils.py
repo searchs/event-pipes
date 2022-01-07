@@ -22,9 +22,9 @@ def count_by_country(survey_df) -> DataFrame:
 def get_spark_app_config():
     spark_conf = SparkConf()
     config = configparser.ConfigParser()
-    config.read("spark_conf")
+    config.read("spark.conf")
 
-    for (key,val) in config.items("SPARK_APP_CONFIGs"):
+    for (key, val) in config.items("SPARK_APP_CONFIGS"):
         spark_conf.set(key, val)
     return spark_conf
 

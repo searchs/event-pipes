@@ -1,27 +1,21 @@
 import findspark
-from pyspark.sql import SparkSession
+from pyspark.sql import *
 from lib.logger import Log4j
 from lib.utils import *
 
 findspark.init()
 
 if __name__ == '__main__':
+    conf = get_spark_app_config()
+
     spark = SparkSession \
         .builder \
-        .master("local[2]") \
-        .appName("HolaSparkSQL") \
+        .master("local[3]") \
+        .appName(conf.get("HolaSparkSql")) \
         .getOrCreate()
 
     logger = Log4j(spark)
 
-    surveyDF = spark.read \
-        .option("header", "true") \
-        .option("inferSchema", "true") \
-        .csv("data/survey.csv")
-
-    surveyDF.head()
-
-    surveyDF.createOrReplaceTempView("survey_tbl")
-    countDF = spark.sql("select Country, count(1) as count from survey_tbl where Age<40 group by Country")
-
+    surveyDF = load_survey_df(spark, "data/survey.csv")
+    countDF = count_by_country(surveyDF)
     countDF.show()

@@ -1,13 +1,14 @@
 import findspark
 from pyspark.sql import SparkSession
 from lib.logger import Log4j
+from lib.utils import *
 
 findspark.init()
 
 if __name__ == '__main__':
     spark = SparkSession \
         .builder \
-        .master("local[3]") \
+        .master("local[2]") \
         .appName("HolaSparkSQL") \
         .getOrCreate()
 

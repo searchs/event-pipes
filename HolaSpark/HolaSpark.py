@@ -7,11 +7,13 @@ findspark.init()
 
 if __name__ == '__main__':
     conf = get_spark_app_config()
-
+    print("==" * 35 + "\n")
+    print(conf.getAll())
+    print("==" * 35 + "\n")
     spark = SparkSession \
         .builder \
         .master("local[3]") \
-        .appName(conf.get("HolaSparkSql")) \
+        .appName("HolaSparkSql") \
         .getOrCreate()
 
     logger = Log4j(spark)

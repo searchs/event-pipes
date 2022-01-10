@@ -26,8 +26,8 @@ class UtilsTestCase(TestCase):
             count_dict[row["Country"]] = row["count"]
 
         self.assertEqual(count_dict["United States"], 4, "Count for United States should be 4")
-        self.assertEqual(count_dict["Canada"], 2, "Count for United States should be 4")
-        self.assertEqual(count_dict["United Kingdom"], 1, "Count for United States should be 4")
+        self.assertEqual(count_dict["Canada"], 2, "Count for United States should be 2")
+        self.assertEqual(count_dict["United Kingdom"], 1, "Count for United States should be 1")
 
     @classmethod
     def tearDownClass(cls) -> None:

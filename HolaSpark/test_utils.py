@@ -1,6 +1,6 @@
 from unittest import TestCase
 from pyspark.sql import SparkSession
-from lib.utils import load_survey_df, count_by_country
+from HolaSpark.lib import load_survey_df, count_by_country
 
 
 class UtilsTestCase(TestCase):

@@ -8,10 +8,11 @@ class UtilsTestCase(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.spark = SparkSession.builder \
-            .master("local[3]") \
-            .appName("HolaSparkTest") \
+        cls.spark = (
+            SparkSession.builder.master("local[3]")
+            .appName("HolaSparkTest")
             .getOrCreate()
+        )
 
     def test_datafile_loading(self):
         sample_df = load_survey_df(self.spark, "data/survey.csv")
@@ -25,9 +26,13 @@ class UtilsTestCase(TestCase):
         for row in count_list:
             count_dict[row["Country"]] = row["count"]
 
-        self.assertEqual(count_dict["United States"], 4, "Count for United States should be 4")
+        self.assertEqual(
+            count_dict["United States"], 4, "Count for United States should be 4"
+        )
         self.assertEqual(count_dict["Canada"], 2, "Count for United States should be 2")
-        self.assertEqual(count_dict["United Kingdom"], 1, "Count for United States should be 1")
+        self.assertEqual(
+            count_dict["United Kingdom"], 1, "Count for United States should be 1"
+        )
 
     @classmethod
     def tearDownClass(cls) -> None:

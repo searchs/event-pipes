@@ -132,3 +132,5 @@ dmypy.json
 
 #Custom
 .idea/
+/StreamFiles/output/
+/StreamFiles/chk-point-dir/

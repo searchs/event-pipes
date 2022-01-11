@@ -117,3 +117,6 @@ notification_writer_query = (
     .option("checkpointLocation", "chk-point-dir")
     .start()
 )
+
+logger.info("Listenign and writing to kafka topic")
+notification_writer_query.awaitTermination()

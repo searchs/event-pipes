@@ -24,3 +24,4 @@ sh /Users/screative/devbox/engineering/kafka/kafka3/bin/kafka-topics.sh --create
 #Start Producer
 #sh $local_kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic invoices
 sh /Users/screative/devbox/engineering/kafka/kafka3/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic invoices
+

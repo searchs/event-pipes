@@ -27,7 +27,6 @@ if __name__ == "__main__":
         SparkSession.builder.appName("Streaming Kafka Starter")
         .master("local[3]")
         .config("spark.streaming.stopGracefullyOnShutdown", "true")
-        .config("spark.sql.shuffle.partitions", 3)
         .config("spark.sql.streaming.schemaInference", "true")
         .getOrCreate()
     )
@@ -79,8 +78,6 @@ if __name__ == "__main__":
         ]
     )
 
-    print("KAFKA DF NOW READY???????????????????")
-
     kafka_df = (
         spark.read.format("kafka")
         .option("kafka.bootstrap.servers", "localhost:9092")
@@ -118,5 +115,5 @@ notification_writer_query = (
     .start()
 )
 
-logger.info("Listenign and writing to kafka topic")
+logger.info("Listening and writing to kafka topic")
 notification_writer_query.awaitTermination()

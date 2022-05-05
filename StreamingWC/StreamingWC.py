@@ -3,7 +3,7 @@ from pyspark.sql.functions import expr
 
 from lib.logger import Log4j
 
-""" 
+"""
  Algorithm for Spark Streaming
 1. Read a Streaming Source - Input DataFrame
 2. Transform - Output DataFrame
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     # Sink(Write) step
     word_count_query = (
         counts_df.writeStream.format("console")
-        .option("checkpointLocaiton", "chk-point-dir")
+        .option("checkpointLocation", "chk-point-dir")
         .outputMode("complete")
         .start()
     )

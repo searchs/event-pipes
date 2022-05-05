@@ -134,3 +134,4 @@ dmypy.json
 .idea/
 /StreamFiles/output/
 /StreamFiles/chk-point-dir/
+/.vscode/

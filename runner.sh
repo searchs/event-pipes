@@ -19,7 +19,7 @@ sh /Users/screative/devbox/engineering/kafka/kafka3/bin/kafka-server-start.sh /U
 
 #  Create topic
 #sh $local_kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic invoices
-sh /Users/screative/devbox/engineering/kafka/kafka3/bin/kafka-topics.sh --create --bootstrap-servers localhost:9092 --replication-factor 1 --partitions 1 --topic invoices
+sh /Users/screative/devbox/engineering/kafka/kafka3/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic invoices
 
 #Start Producer
 #sh $local_kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic invoices

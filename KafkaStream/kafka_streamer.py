@@ -1,5 +1,4 @@
-from pyparsing import col
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, Column
 from pyspark.sql.functions import from_json, expr
 from pyspark.sql.types import (
     StructField,
@@ -13,21 +12,12 @@ from pyspark.sql.types import (
 
 from lib.logger import Log4j
 
-""" 
- Algorithm for Spark Streaming
-1. Read a Streaming Source - Input DataFrame
-2. Transform - Output DataFrame
-3. Write the output - Sink
-"""
-
-
 if __name__ == "__main__":
-
+    # setup spark
     spark = (
-        SparkSession.builder.appName("Streaming Kafka Starter")
+        SparkSession.builder.appName("File Streaming app")
         .master("local[3]")
         .config("spark.streaming.stopGracefullyOnShutdown", "true")
-        .config("spark.sql.streaming.schemaInference", "true")
         .getOrCreate()
     )
 
@@ -78,42 +68,57 @@ if __name__ == "__main__":
         ]
     )
 
+    # subscribe to Kafka topic
     kafka_df = (
-        spark.read.format("kafka")
+        spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", "localhost:9092")
         .option("subscribe", "invoices")
         .option("startingOffsets", "earliest")
         .load()
     )
 
+    # Check the data Schema
+    kafka_df.printSchema()
+
+    # Transformation step
     value_df = kafka_df.select(
-        from_json(col("value").cast("string"), schema).alias("value")
+        from_json(Column("value").cast("string"), schema).alias("value")
     )
 
-    # value_df.show()
-    notification_df = value_df.select(
-        "value.InvoiceNumber", "value.CustomerCardNo", "value.TotalAmount"
-    ).withColumn("EarnedLoyaltyPoints", expr("TotalAmount * 0.2"))
+    # value_df.printSchema()
 
+    # Explode ingested data
 
-kafka_target_df = notification_df.selectExpr(
-    "InvoiceNumber as key",
-    """to_json(named_struct(
-                                             'CustomerCardNo', CustomerCardNo,
-                                             'TotalAmount', TotalAmount,
-                                             'EarnedLoyaltyPoints', TotalAmount * 0.2
-                                             )) as value""",
-)
-# notification_df.show()
-notification_writer_query = (
-    kafka_target_df.writeStream.queryName("Notification Writer")
-    .format("kafka")
-    .option("kafka.bootstrap.servers", "localhost:9092")
-    .option("topic", "nofications")
-    .outputMode("append")
-    .option("checkpointLocation", "chk-point-dir")
-    .start()
-)
+    explode_df = value_df.selectExpr("value.InvoiceNumber",
+                                     "value.CreatedTime",
+                                     "value.PosID",
+                                     "value.CustomerType",
+                                     "value.PaymentMethod",
+                                     "value.DeliveryType",
+                                     "value.DeliveryAddress.City",
+                                     "value.DeliveryAddress.State",
+                                     "value.DeliveryAddress.PinCode",
+                                     "explode(value.InvoiceLineItems) as LineItem",
+                                     )
 
-logger.info("Listening and writing to kafka topic")
-notification_writer_query.awaitTermination()
+    flattened_df = (
+        explode_df.withColumn("ItemCode", expr("LineItem.ItemCode"))
+            .withColumn("ItemDescription", expr("LineItem.ItemDescription"))
+            .withColumn("ItemPrice", expr("LineItem.ItemPrice"))
+            .withColumn("ItemQty", expr("LineItem.ItemQty"))
+            .withColumn("TotalValue", expr("LineItem.TotalValue"))
+            .drop("LineItem")
+    )
+
+    invoice_writer_query = (flattened_df.writeStream
+                            .format("json")
+                            .queryName("Flattened Invoice Writer 2")
+                            .outputMode("append")
+                            .option("path", "output")
+                            .option("checkpointLocation", "chk-point-dir")
+                            .trigger(processingTime="1 minute")
+                            .start()
+                            )
+
+    logger.info("Listening to Kafka")
+    invoice_writer_query.awaitTermination()

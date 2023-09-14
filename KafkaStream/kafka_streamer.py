@@ -73,7 +73,8 @@ if __name__ == "__main__":
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", "localhost:9092")
         .option("subscribe", "invoices")
-        .option("startingOffsets", "earliest")
+        # .option("startingOffsets", "earliest")
+            # .option("startingOffsets", "earliest")
         .load()
     )
 

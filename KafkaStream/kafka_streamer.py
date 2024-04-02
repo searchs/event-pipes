@@ -74,7 +74,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", "localhost:9092")
         .option("subscribe", "invoices")
         # .option("startingOffsets", "earliest")
-            # .option("startingOffsets", "earliest")
+        # .option("startingOffsets", "earliest")
         .load()
     )
 
@@ -90,36 +90,37 @@ if __name__ == "__main__":
 
     # Explode ingested data
 
-    explode_df = value_df.selectExpr("value.InvoiceNumber",
-                                     "value.CreatedTime",
-                                     "value.PosID",
-                                     "value.CustomerType",
-                                     "value.PaymentMethod",
-                                     "value.DeliveryType",
-                                     "value.DeliveryAddress.City",
-                                     "value.DeliveryAddress.State",
-                                     "value.DeliveryAddress.PinCode",
-                                     "explode(value.InvoiceLineItems) as LineItem",
-                                     )
+    explode_df = value_df.selectExpr(
+        "value.InvoiceNumber",
+        "value.CreatedTime",
+        "value.PosID",
+        "value.CustomerType",
+        "value.PaymentMethod",
+        "value.DeliveryType",
+        "value.DeliveryAddress.City",
+        "value.DeliveryAddress.State",
+        "value.DeliveryAddress.PinCode",
+        "explode(value.InvoiceLineItems) as LineItem",
+    )
 
     flattened_df = (
         explode_df.withColumn("ItemCode", expr("LineItem.ItemCode"))
-            .withColumn("ItemDescription", expr("LineItem.ItemDescription"))
-            .withColumn("ItemPrice", expr("LineItem.ItemPrice"))
-            .withColumn("ItemQty", expr("LineItem.ItemQty"))
-            .withColumn("TotalValue", expr("LineItem.TotalValue"))
-            .drop("LineItem")
+        .withColumn("ItemDescription", expr("LineItem.ItemDescription"))
+        .withColumn("ItemPrice", expr("LineItem.ItemPrice"))
+        .withColumn("ItemQty", expr("LineItem.ItemQty"))
+        .withColumn("TotalValue", expr("LineItem.TotalValue"))
+        .drop("LineItem")
     )
 
-    invoice_writer_query = (flattened_df.writeStream
-                            .format("json")
-                            .queryName("Flattened Invoice Writer 2")
-                            .outputMode("append")
-                            .option("path", "output")
-                            .option("checkpointLocation", "chk-point-dir")
-                            .trigger(processingTime="1 minute")
-                            .start()
-                            )
+    invoice_writer_query = (
+        flattened_df.writeStream.format("json")
+        .queryName("Flattened Invoice Writer 2")
+        .outputMode("append")
+        .option("path", "output")
+        .option("checkpointLocation", "chk-point-dir")
+        .trigger(processingTime="1 minute")
+        .start()
+    )
 
     logger.info("Listening to Kafka")
     invoice_writer_query.awaitTermination()

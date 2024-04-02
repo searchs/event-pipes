@@ -128,10 +128,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-
-
 #Custom
 .idea/
 /StreamFiles/output/
 /StreamFiles/chk-point-dir/
 /.vscode/
+/out
+/output
